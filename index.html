@@ -2,27 +2,49 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
   <title>探究 壁打ちAI</title>
 
-  <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
 </head>
+
 
 <body>
 
   <main class="container">
 
-    <section id="startScreen" class="card">
 
-      <h1>探究 壁打ちAI</h1>
+    <!-- ==================================================
+         開始画面
+    ================================================== -->
+
+    <section
+      id="startScreen"
+      class="card"
+    >
+
+      <h1>
+        探究 壁打ちAI
+      </h1>
 
       <p class="lead">
-        今の考えをAIと話しながら、少しずつ広げたり深めたりしてみましょう。
+        今の考えをAIと話しながら、
+        少しずつ広げたり深めたりしてみましょう。
       </p>
 
+
       <label>
+
         生徒番号
+
         <input
           id="studentId"
           type="text"
@@ -30,62 +52,128 @@
           maxlength="4"
           placeholder="例：1102"
         >
+
       </label>
 
+
       <label>
+
         氏名
+
         <input
           id="studentName"
           type="text"
           placeholder="氏名"
         >
+
       </label>
 
+
       <label>
+
         探究テーマ
+
         <textarea
           id="theme"
           rows="3"
           placeholder="今取り組んでいる探究テーマ"
         ></textarea>
+
       </label>
+
 
       <label>
+
         今の探究段階
+
         <select id="stage">
-          <option value="">選んでください</option>
-          <option value="課題の設定">課題の設定</option>
-          <option value="情報の収集">情報の収集</option>
-          <option value="整理・分析">整理・分析</option>
-          <option value="まとめ・表現">まとめ・表現</option>
+
+          <option value="">
+            選んでください
+          </option>
+
+          <option value="課題の設定">
+            課題の設定
+          </option>
+
+          <option value="情報の収集">
+            情報の収集
+          </option>
+
+          <option value="整理・分析">
+            整理・分析
+          </option>
+
+          <option value="まとめ・表現">
+            まとめ・表現
+          </option>
+
         </select>
+
       </label>
 
-      <button id="startBtn" class="primary">
+
+      <button
+        id="startBtn"
+        class="primary"
+      >
         壁打ちを始める
       </button>
 
-      <p id="startMessage" class="message"></p>
+
+      <p
+        id="startMessage"
+        class="message"
+      ></p>
 
     </section>
 
 
-    <section id="chatScreen" class="card hidden">
+
+    <!-- ==================================================
+         壁打ち画面
+    ================================================== -->
+
+    <section
+      id="chatScreen"
+      class="card hidden"
+    >
 
       <div class="chatHeader">
 
         <div>
-          <div class="small">探究テーマ</div>
-          <div id="themeTitle" class="themeTitle"></div>
+
+          <div class="small">
+            探究テーマ
+          </div>
+
+          <div
+            id="themeTitle"
+            class="themeTitle"
+          ></div>
+
         </div>
 
-        <div class="stageBadge" id="stageTitle"></div>
+
+        <div
+          id="stageTitle"
+          class="stageBadge"
+        ></div>
 
       </div>
 
-      <div id="progress" class="progress"></div>
 
-      <div id="chatArea" class="chatArea"></div>
+      <div
+        id="progress"
+        class="progress"
+      ></div>
+
+
+      <div
+        id="chatArea"
+        class="chatArea"
+      ></div>
+
 
       <div class="answerArea">
 
@@ -95,92 +183,146 @@
           placeholder="あなたの考えを入力してください"
         ></textarea>
 
+
         <div class="buttonRow">
 
-          <button id="answerBtn" class="primary">
+          <button
+            id="answerBtn"
+            class="primary"
+          >
             送信
           </button>
 
-          <button id="endBtn" class="secondary">
+
+          <button
+            id="endBtn"
+            class="secondary"
+          >
             ここで終了
           </button>
 
         </div>
 
-        <p id="chatMessage" class="message"></p>
+
+        <p
+          id="chatMessage"
+          class="message"
+        ></p>
 
       </div>
 
     </section>
 
 
-    <section id="summaryScreen" class="card hidden">
 
-      <h2>今回の壁打ち</h2>
+    <!-- ==================================================
+         まとめ画面
+    ================================================== -->
+
+    <section
+      id="summaryScreen"
+      class="card hidden"
+    >
+
+      <h2>
+        今回の壁打ち
+      </h2>
+
 
       <div id="summary"></div>
 
+
       <div class="buttonRow">
-  <button id="mindmapBtn" class="primary">
-    マインドマップを作成
-  </button>
+
+        <button
+          id="mindmapBtn"
+          class="primary"
+        >
+          マインドマップを作成
+        </button>
 
 
-  <button id="copyBtn" class="secondary">
-    履歴をコピー
-  </button>
+        <button
+          id="copyBtn"
+          class="secondary"
+        >
+          履歴をコピー
+        </button>
 
-  <button id="restartBtn" class="secondary">
-    最初に戻る
-  </button>
 
-</div>
+        <button
+          id="restartBtn"
+          class="secondary"
+        >
+          最初に戻る
+        </button>
 
-      <p id="copyMessage" class="message"></p>
+      </div>
+
+
+      <p
+        id="copyMessage"
+        class="message"
+      ></p>
 
     </section>
-<section id="mindmapScreen" class="card hidden">
-
-  <div class="mindmapTop">
-
-    <h2>探究マインドマップ</h2>
-
-    <button id="backMindmapBtn" class="secondary">
-      まとめに戻る
-    </button>
-
-  </div>
 
 
-  <div id="mindmapLoading" class="mindmapLoading hidden">
-    マインドマップを整理しています…
-  </div>
+
+    <!-- ==================================================
+         マインドマップ画面
+    ================================================== -->
+
+    <section
+      id="mindmapScreen"
+      class="card hidden"
+    >
+
+      <div class="mindmapTop">
+
+        <h2>
+          探究マインドマップ
+        </h2>
 
 
-  <div id="mindmapArea"></div>
+        <button
+          id="backSummaryBtn"
+          class="secondary"
+        >
+          まとめに戻る
+        </button>
+
+      </div>
 
 
-  <div class="buttonRow">
+      <div
+        id="mindmapLoading"
+        class="mindmapLoading hidden"
+      >
+        マインドマップを整理しています…
+      </div>
 
-    <button id="printMindmapBtn" class="primary">
-      印刷・PDF保存
-    </button>
 
-  </div>
+      <div
+        id="mindmapArea"
+        class="mindmapArea"
+      ></div>
 
-</section>
 
-  <div id="mindmapArea" class="mindmapArea"></div>
+      <div class="buttonRow">
 
-  <div class="buttonRow">
+        <button
+          id="printMindmapBtn"
+          class="primary"
+        >
+          印刷・PDF保存
+        </button>
 
-    <button id="printMindmapBtn" class="primary">
-      印刷・PDF保存
-    </button>
+      </div>
 
-  </div>
+    </section>
 
-</section>
+
   </main>
 
 
