@@ -3,7 +3,7 @@
 // ==================================================
 
 // ★ここだけ、現在使っている正しいGASの /exec URL にしてください
-const GAS_URL ="AKfycbxkHdYOtBLbpMPDCgDqtBdiltcYvNAhcnVIN3sRFd_SvElx9ZuGXIqPlgD9Uw_6MZN1/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxkHdYOtBLbpMPDCgDqtBdiltcYvNAhcnVIN3sRFd_SvElx9ZuGXIqPlgD9Uw_6MZN1/exec";
 
 // ==================================================
 // 状態
