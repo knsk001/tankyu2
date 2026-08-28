@@ -121,10 +121,10 @@
       <div id="summary"></div>
 
       <div class="buttonRow">
-
   <button id="mindmapBtn" class="primary">
-    マインドマップを見る
+    マインドマップを作成
   </button>
+
 
   <button id="copyBtn" class="secondary">
     履歴をコピー
@@ -141,15 +141,34 @@
     </section>
 <section id="mindmapScreen" class="card hidden">
 
-  <div class="mindmapHeader">
+  <div class="mindmapTop">
 
     <h2>探究マインドマップ</h2>
 
-    <button id="backSummaryBtn" class="secondary">
+    <button id="backMindmapBtn" class="secondary">
       まとめに戻る
     </button>
 
   </div>
+
+
+  <div id="mindmapLoading" class="mindmapLoading hidden">
+    マインドマップを整理しています…
+  </div>
+
+
+  <div id="mindmapArea"></div>
+
+
+  <div class="buttonRow">
+
+    <button id="printMindmapBtn" class="primary">
+      印刷・PDF保存
+    </button>
+
+  </div>
+
+</section>
 
   <div id="mindmapArea" class="mindmapArea"></div>
 
