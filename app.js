@@ -119,7 +119,30 @@ $("restartBtn")
     "click",
     () => location.reload()
   );
+$("mindmapBtn")
+  .addEventListener(
+    "click",
+    showMindmap
+  );
 
+$("backSummaryBtn")
+  .addEventListener(
+    "click",
+    () => {
+
+      $("mindmapScreen")
+        .classList.add("hidden");
+
+      $("summaryScreen")
+        .classList.remove("hidden");
+    }
+  );
+
+$("printMindmapBtn")
+  .addEventListener(
+    "click",
+    () => window.print()
+  );
 
 // ==================================================
 // 開始
@@ -758,4 +781,98 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+function showMindmap() {
+
+  $("summaryScreen")
+    .classList.add("hidden");
+
+  $("mindmapScreen")
+    .classList.remove("hidden");
+
+
+  const items =
+    state.history
+      .map(
+        (item, index) => `
+
+          <div class="mindmapNode">
+
+            <div class="mindmapNumber">
+              対話 ${index + 1}
+            </div>
+
+            <div class="mindmapQuestion">
+              ${escapeHtml(item.ai)}
+            </div>
+
+            <div class="mindmapAnswer">
+              <strong>回答</strong><br>
+              ${escapeHtml(item.student)}
+            </div>
+
+          </div>
+        `
+      )
+      .join("");
+
+
+  const lastIdeas =
+    state.history
+      .slice(-3)
+      .map(item =>
+        `<li>${escapeHtml(item.student)}</li>`
+      )
+      .join("");
+
+
+  $("mindmapArea").innerHTML = `
+
+    <div class="mindmapTitleBox">
+
+      <div class="mindmapLabel">
+        探究テーマ
+      </div>
+
+      <div class="mindmapTheme">
+        ${escapeHtml(state.theme)}
+      </div>
+
+      <div class="mindmapStage">
+        ${escapeHtml(state.stage)}
+      </div>
+
+    </div>
+
+
+    <div class="mindmapCenter">
+
+      <div class="centerBubble">
+
+        ${escapeHtml(state.theme)}
+
+      </div>
+
+    </div>
+
+
+    <div class="mindmapGrid">
+
+      ${items}
+
+    </div>
+
+
+    <div class="mindmapSummary">
+
+      <h3>
+        今回出てきた考え
+      </h3>
+
+      <ul>
+        ${lastIdeas}
+      </ul>
+
+    </div>
+  `;
 }
