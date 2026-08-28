@@ -221,3 +221,152 @@ button:disabled {
     margin-left: 4%;
   }
 }
+/* ==================================================
+   マインドマップ
+================================================== */
+
+.mindmapHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.mindmapArea {
+  margin-top: 20px;
+}
+
+.mindmapTitleBox {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mindmapLabel {
+  font-size: 13px;
+  color: #666;
+}
+
+.mindmapTheme {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.mindmapStage {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  font-size: 14px;
+}
+
+.mindmapCenter {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0;
+}
+
+.centerBubble {
+  width: min(360px, 90%);
+  padding: 30px 24px;
+  border: 4px solid #2563eb;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  background: #eff6ff;
+}
+
+.mindmapGrid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mindmapNode {
+  border: 2px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 15px;
+  background: white;
+  page-break-inside: avoid;
+}
+
+.mindmapNumber {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  font-weight: bold;
+}
+
+.mindmapQuestion {
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.mindmapAnswer {
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 10px;
+  line-height: 1.6;
+}
+
+.mindmapSummary {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #f0fdf4;
+}
+
+.mindmapSummary h3 {
+  margin-top: 0;
+}
+
+
+/* スマホ */
+@media (max-width: 700px) {
+
+  .mindmapGrid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+/* 印刷 */
+@media print {
+
+  body {
+    background: white;
+  }
+
+  .container {
+    width: 100%;
+    margin: 0;
+  }
+
+  .card {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  #startScreen,
+  #chatScreen,
+  #summaryScreen,
+  .mindmapHeader,
+  #printMindmapBtn {
+    display: none !important;
+  }
+
+  #mindmapScreen {
+    display: block !important;
+  }
+
+  .mindmapGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
