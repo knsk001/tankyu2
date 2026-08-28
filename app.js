@@ -876,3 +876,143 @@ function showMindmap() {
     </div>
   `;
 }
+async function createMindmap() {
+
+  $("summaryScreen").classList.add("hidden");
+  $("mindmapScreen").classList.remove("hidden");
+
+  $("mindmapLoading").classList.remove("hidden");
+  $("mindmapArea").innerHTML = "";
+
+  try {
+
+    const result = await postRequest({
+      action: "mindmap",
+      theme: state.theme,
+      stage: state.stage,
+      history: state.history
+    });
+
+    if (!result.success) {
+      throw new Error(
+        result.message ||
+        "マインドマップを作成できませんでした。"
+      );
+    }
+
+    drawMindmap(result.mindmap);
+
+  } catch (error) {
+
+    $("mindmapArea").innerHTML = `
+      <div class="errorMessage">
+        マインドマップを作成できませんでした。<br>
+        ${escapeHtml(error.message)}
+      </div>
+    `;
+
+  } finally {
+
+    $("mindmapLoading").classList.add("hidden");
+  }
+}
+function drawMindmap(data) {
+
+  const branches = data.branches || [];
+
+  const branchHtml = branches
+    .map((branch, index) => {
+
+      const items = (branch.items || [])
+        .map(item => `
+          <div class="mindmapItem">
+            ${escapeHtml(item)}
+          </div>
+        `)
+        .join("");
+
+      return `
+        <div class="mindmapBranch branch${(index % 6) + 1}">
+
+          <div class="branchLine"></div>
+
+          <div class="branchBox">
+
+            <div class="branchTitle">
+              ${escapeHtml(branch.title)}
+            </div>
+
+            <div class="branchItems">
+              ${items}
+            </div>
+
+          </div>
+
+        </div>
+      `;
+    })
+    .join("");
+
+  $("mindmapArea").innerHTML = `
+
+    <div class="mindmapStudentInfo">
+
+      <span>
+        生徒番号：
+        ${escapeHtml(state.studentId)}
+      </span>
+
+      <span>
+        氏名：
+        ${escapeHtml(state.studentName)}
+      </span>
+
+      <span>
+        探究段階：
+        ${escapeHtml(state.stage)}
+      </span>
+
+    </div>
+
+
+    <div class="mindmapCanvas">
+
+      <div class="mindmapCenter">
+
+        <div class="centerLabel">
+          探究テーマ
+        </div>
+
+        <div class="centerTheme">
+          ${escapeHtml(data.center || state.theme)}
+        </div>
+
+      </div>
+
+
+      <div class="mindmapBranches">
+        ${branchHtml}
+      </div>
+
+    </div>
+
+
+    ${
+      data.coreIdea
+        ? `
+          <div class="coreIdea">
+
+            <div class="coreIdeaLabel">
+              今回の壁打ちで見えてきたこと
+            </div>
+
+            <div class="coreIdeaText">
+              ${escapeHtml(data.coreIdea)}
+            </div>
+
+          </div>
+        `
+        : ""
+    }
+  `;
+}
