@@ -1,6 +1,13 @@
-const GAS_URL =
-  "https://script.google.com/macros/s/AKfycbxkHdYOtBLbpMPDCgDqtBdiltcYvNAhcnVIN3sRFd_SvElx9ZuGXIqPlgD9Uw_6MZN1/exec";
+// ==================================================
+// GAS Webアプリ URL
+// ==================================================
 
+// ★ここだけ、現在使っている正しいGASの /exec URL にしてください
+const GAS_URL ="AKfycbxkHdYOtBLbpMPDCgDqtBdiltcYvNAhcnVIN3sRFd_SvElx9ZuGXIqPlgD9Uw_6MZN1/exec";
+
+// ==================================================
+// 状態
+// ==================================================
 
 let state = {
 
@@ -20,6 +27,10 @@ let state = {
   currentAIMessage: ""
 };
 
+
+// ==================================================
+// DOM取得
+// ==================================================
 
 const $ =
   id => document.getElementById(id);
@@ -57,6 +68,11 @@ async function postRequest(data) {
     return JSON.parse(text);
 
   } catch {
+
+    console.error(
+      "GASから返ってきた内容:",
+      text
+    );
 
     throw new Error(
       "サーバーから正しい応答がありませんでした。"
@@ -119,11 +135,18 @@ $("restartBtn")
     "click",
     () => location.reload()
   );
+
+
+// ------------------------------
+// マインドマップ
+// ------------------------------
+
 $("mindmapBtn")
   .addEventListener(
     "click",
-    showMindmap
+    createMindmap
   );
+
 
 $("backSummaryBtn")
   .addEventListener(
@@ -138,11 +161,36 @@ $("backSummaryBtn")
     }
   );
 
+
 $("printMindmapBtn")
   .addEventListener(
     "click",
     () => window.print()
   );
+
+
+// ==================================================
+// Enterキー
+// ==================================================
+
+$("answer")
+  .addEventListener(
+    "keydown",
+    event => {
+
+      // Shift + Enter は改行
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+
+        event.preventDefault();
+
+        submitAnswer();
+      }
+    }
+  );
+
 
 // ==================================================
 // 開始
@@ -162,6 +210,10 @@ async function startSession() {
   const stage =
     $("stage").value;
 
+
+  // ------------------------------
+  // 入力確認
+  // ------------------------------
 
   if (!/^\d{4}$/.test(studentId)) {
 
@@ -193,6 +245,10 @@ async function startSession() {
 
   try {
 
+    // ------------------------------
+    // 設定取得
+    // ------------------------------
+
     const settingsResult =
       await postRequest({
         action: "settings"
@@ -221,6 +277,10 @@ async function startSession() {
     }
 
 
+    // ------------------------------
+    // 状態初期化
+    // ------------------------------
+
     state.studentId =
       studentId;
 
@@ -237,6 +297,12 @@ async function startSession() {
 
     state.history = [];
 
+    state.currentAIMessage = "";
+
+
+    // ------------------------------
+    // GASへ開始通知
+    // ------------------------------
 
     const result =
       await postRequest({
@@ -261,10 +327,15 @@ async function startSession() {
 
       throw new Error(
         result.error ||
+        result.message ||
         "開始できませんでした。"
       );
     }
 
+
+    // ------------------------------
+    // 最初のAIメッセージ
+    // ------------------------------
 
     state.currentAIMessage =
       result.message;
@@ -290,6 +361,13 @@ async function startSession() {
 
 
     updateProgress();
+
+
+    $("startMessage").textContent =
+      "";
+
+    $("chatMessage").textContent =
+      "";
 
 
     $("answer").focus();
@@ -336,18 +414,26 @@ async function submitAnswer() {
     "AIが考えています…";
 
 
+  // ------------------------------
+  // 生徒回答表示
+  // ------------------------------
+
   addStudentMessage(
     message
   );
 
 
+  // ------------------------------
+  // 対話回数
+  // ------------------------------
+
   state.turn++;
 
 
-  /*
-   * 今回の1往復を
-   * ローカル履歴へ追加
-   */
+  // ------------------------------
+  // ローカル履歴へ保存
+  // ------------------------------
+
   state.history.push({
 
     ai:
@@ -363,19 +449,9 @@ async function submitAnswer() {
 
   try {
 
-    /*
-     * 最大回数なら
-     * AIを呼ばず終了
-     */
-    if (
-      state.turn >= state.maxTurns
-    ) {
-
-      await finishSession();
-
-      return;
-    }
-
+    // ------------------------------
+    // Geminiへ送信
+    // ------------------------------
 
     const result =
       await postRequest({
@@ -411,10 +487,29 @@ async function submitAnswer() {
 
       throw new Error(
         result.error ||
+        result.message ||
         "AIとの通信に失敗しました。"
       );
     }
 
+
+    // ------------------------------
+    // 最大回数到達
+    // ------------------------------
+
+    if (
+      state.turn >= state.maxTurns
+    ) {
+
+      await finishSession();
+
+      return;
+    }
+
+
+    // ------------------------------
+    // 次のAI質問
+    // ------------------------------
 
     state.currentAIMessage =
       result.message;
@@ -428,16 +523,16 @@ async function submitAnswer() {
     updateProgress();
 
 
-    /*
-     * 基本10回に達したら
-     * 終了するか続けるか選べる
-     */
+    // ------------------------------
+    // 基本回数終了
+    // ------------------------------
+
     if (
       state.turn >= state.basicTurns
     ) {
 
       $("chatMessage").textContent =
-        "10回の壁打ちが終わりました。ここで終了しても、もう少し続けてもかまいません。";
+        `${state.basicTurns}回の壁打ちが終わりました。ここで終了しても、もう少し続けてもかまいません。`;
 
     } else {
 
@@ -478,8 +573,12 @@ function addAIMessage(text) {
 
 
   block.innerHTML = `
-    <div class="sender">AI</div>
-    <div class="aiMessage"></div>
+    <div class="sender">
+      AI
+    </div>
+
+    <div class="aiMessage">
+    </div>
   `;
 
 
@@ -511,8 +610,12 @@ function addStudentMessage(text) {
 
 
   block.innerHTML = `
-    <div class="sender">あなた</div>
-    <div class="studentMessage"></div>
+    <div class="sender">
+      あなた
+    </div>
+
+    <div class="studentMessage">
+    </div>
   `;
 
 
@@ -633,12 +736,20 @@ function showSummary() {
 
             <br><br>
 
-            <strong>AI</strong><br>
+            <strong>
+              AI
+            </strong>
+            <br>
+
             ${escapeHtml(item.ai)}
 
             <br><br>
 
-            <strong>回答</strong><br>
+            <strong>
+              回答
+            </strong>
+            <br>
+
             ${escapeHtml(item.student)}
 
           </div>
@@ -651,7 +762,10 @@ function showSummary() {
 
     <div class="summaryBlock">
 
-      <strong>生徒番号</strong><br>
+      <strong>
+        生徒番号
+      </strong>
+      <br>
 
       ${escapeHtml(
         state.studentId
@@ -662,7 +776,10 @@ function showSummary() {
 
     <div class="summaryBlock">
 
-      <strong>氏名</strong><br>
+      <strong>
+        氏名
+      </strong>
+      <br>
 
       ${escapeHtml(
         state.studentName
@@ -673,7 +790,10 @@ function showSummary() {
 
     <div class="summaryBlock">
 
-      <strong>探究テーマ</strong><br>
+      <strong>
+        探究テーマ
+      </strong>
+      <br>
 
       ${escapeHtml(
         state.theme
@@ -684,7 +804,10 @@ function showSummary() {
 
     <div class="summaryBlock">
 
-      <strong>探究段階</strong><br>
+      <strong>
+        探究段階
+      </strong>
+      <br>
 
       ${escapeHtml(
         state.stage
@@ -695,14 +818,19 @@ function showSummary() {
 
     <div class="summaryBlock">
 
-      <strong>今回の対話回数</strong><br>
+      <strong>
+        今回の対話回数
+      </strong>
+      <br>
 
       ${state.history.length}
 
     </div>
 
 
-    <h3>壁打ち履歴</h3>
+    <h3>
+      壁打ち履歴
+    </h3>
 
     ${historyHtml}
   `;
@@ -710,7 +838,7 @@ function showSummary() {
 
 
 // ==================================================
-// コピー
+// 履歴コピー
 // ==================================================
 
 async function copyHistory() {
@@ -782,7 +910,13 @@ function escapeHtml(text) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-function showMindmap() {
+
+
+// ==================================================
+// マインドマップ作成
+// ==================================================
+
+async function createMindmap() {
 
   $("summaryScreen")
     .classList.add("hidden");
@@ -791,228 +925,247 @@ function showMindmap() {
     .classList.remove("hidden");
 
 
-  const items =
-    state.history
-      .map(
-        (item, index) => `
+  $("mindmapLoading")
+    .classList.remove("hidden");
 
-          <div class="mindmapNode">
+  $("mindmapArea")
+    .innerHTML =
+      "";
 
-            <div class="mindmapNumber">
-              対話 ${index + 1}
-            </div>
-
-            <div class="mindmapQuestion">
-              ${escapeHtml(item.ai)}
-            </div>
-
-            <div class="mindmapAnswer">
-              <strong>回答</strong><br>
-              ${escapeHtml(item.student)}
-            </div>
-
-          </div>
-        `
-      )
-      .join("");
-
-
-  const lastIdeas =
-    state.history
-      .slice(-3)
-      .map(item =>
-        `<li>${escapeHtml(item.student)}</li>`
-      )
-      .join("");
-
-
-  $("mindmapArea").innerHTML = `
-
-    <div class="mindmapTitleBox">
-
-      <div class="mindmapLabel">
-        探究テーマ
-      </div>
-
-      <div class="mindmapTheme">
-        ${escapeHtml(state.theme)}
-      </div>
-
-      <div class="mindmapStage">
-        ${escapeHtml(state.stage)}
-      </div>
-
-    </div>
-
-
-    <div class="mindmapCenter">
-
-      <div class="centerBubble">
-
-        ${escapeHtml(state.theme)}
-
-      </div>
-
-    </div>
-
-
-    <div class="mindmapGrid">
-
-      ${items}
-
-    </div>
-
-
-    <div class="mindmapSummary">
-
-      <h3>
-        今回出てきた考え
-      </h3>
-
-      <ul>
-        ${lastIdeas}
-      </ul>
-
-    </div>
-  `;
-}
-async function createMindmap() {
-
-  $("summaryScreen").classList.add("hidden");
-  $("mindmapScreen").classList.remove("hidden");
-
-  $("mindmapLoading").classList.remove("hidden");
-  $("mindmapArea").innerHTML = "";
 
   try {
 
-    const result = await postRequest({
-      action: "mindmap",
-      theme: state.theme,
-      stage: state.stage,
-      history: state.history
-    });
+    const result =
+      await postRequest({
+
+        action:
+          "mindmap",
+
+        theme:
+          state.theme,
+
+        stage:
+          state.stage,
+
+        history:
+          state.history
+      });
+
 
     if (!result.success) {
+
       throw new Error(
         result.message ||
+        result.error ||
         "マインドマップを作成できませんでした。"
       );
     }
 
-    drawMindmap(result.mindmap);
+
+    if (!result.mindmap) {
+
+      throw new Error(
+        "マインドマップのデータがありません。"
+      );
+    }
+
+
+    drawMindmap(
+      result.mindmap
+    );
+
 
   } catch (error) {
 
-    $("mindmapArea").innerHTML = `
-      <div class="errorMessage">
-        マインドマップを作成できませんでした。<br>
-        ${escapeHtml(error.message)}
-      </div>
-    `;
+    console.error(error);
 
-  } finally {
 
-    $("mindmapLoading").classList.add("hidden");
-  }
-}
-function drawMindmap(data) {
+    $("mindmapArea")
+      .innerHTML = `
 
-  const branches = data.branches || [];
+        <div class="errorMessage">
 
-  const branchHtml = branches
-    .map((branch, index) => {
+          マインドマップを作成できませんでした。
 
-      const items = (branch.items || [])
-        .map(item => `
-          <div class="mindmapItem">
-            ${escapeHtml(item)}
-          </div>
-        `)
-        .join("");
+          <br><br>
 
-      return `
-        <div class="mindmapBranch branch${(index % 6) + 1}">
-
-          <div class="branchLine"></div>
-
-          <div class="branchBox">
-
-            <div class="branchTitle">
-              ${escapeHtml(branch.title)}
-            </div>
-
-            <div class="branchItems">
-              ${items}
-            </div>
-
-          </div>
+          ${escapeHtml(
+            error.message
+          )}
 
         </div>
       `;
-    })
-    .join("");
-
-  $("mindmapArea").innerHTML = `
-
-    <div class="mindmapStudentInfo">
-
-      <span>
-        生徒番号：
-        ${escapeHtml(state.studentId)}
-      </span>
-
-      <span>
-        氏名：
-        ${escapeHtml(state.studentName)}
-      </span>
-
-      <span>
-        探究段階：
-        ${escapeHtml(state.stage)}
-      </span>
-
-    </div>
 
 
-    <div class="mindmapCanvas">
+  } finally {
 
-      <div class="mindmapCenter">
+    $("mindmapLoading")
+      .classList.add("hidden");
+  }
+}
 
-        <div class="centerLabel">
-          探究テーマ
-        </div>
 
-        <div class="centerTheme">
-          ${escapeHtml(data.center || state.theme)}
-        </div>
+// ==================================================
+// マインドマップ描画
+// ==================================================
+
+function drawMindmap(data) {
+
+  const branches =
+    Array.isArray(data.branches)
+      ? data.branches
+      : [];
+
+
+  const branchHtml =
+    branches
+      .map(
+        (branch, index) => {
+
+          const items =
+            Array.isArray(branch.items)
+              ? branch.items
+              : [];
+
+
+          const itemsHtml =
+            items
+              .map(
+                item => `
+
+                  <div class="mindmapItem">
+
+                    ${escapeHtml(item)}
+
+                  </div>
+                `
+              )
+              .join("");
+
+
+          return `
+
+            <div
+              class="mindmapBranch branch${(index % 6) + 1}"
+            >
+
+              <div class="branchLine">
+              </div>
+
+
+              <div class="branchBox">
+
+                <div class="branchTitle">
+
+                  ${escapeHtml(
+                    branch.title
+                  )}
+
+                </div>
+
+
+                <div class="branchItems">
+
+                  ${itemsHtml}
+
+                </div>
+
+              </div>
+
+            </div>
+          `;
+        }
+      )
+      .join("");
+
+
+  $("mindmapArea")
+    .innerHTML = `
+
+      <div class="mindmapStudentInfo">
+
+        <span>
+          生徒番号：
+          ${escapeHtml(
+            state.studentId
+          )}
+        </span>
+
+        <span>
+          氏名：
+          ${escapeHtml(
+            state.studentName
+          )}
+        </span>
+
+        <span>
+          探究段階：
+          ${escapeHtml(
+            state.stage
+          )}
+        </span>
 
       </div>
 
 
-      <div class="mindmapBranches">
-        ${branchHtml}
-      </div>
-
-    </div>
+      <div class="mindmapCanvas">
 
 
-    ${
-      data.coreIdea
-        ? `
-          <div class="coreIdea">
+        <div class="mindmapCenter">
 
-            <div class="coreIdeaLabel">
-              今回の壁打ちで見えてきたこと
-            </div>
+          <div class="centerLabel">
+            探究テーマ
+          </div>
 
-            <div class="coreIdeaText">
-              ${escapeHtml(data.coreIdea)}
-            </div>
+          <div class="centerTheme">
+
+            ${escapeHtml(
+              data.center ||
+              state.theme
+            )}
 
           </div>
-        `
-        : ""
-    }
-  `;
+
+        </div>
+
+
+        <div class="mindmapBranches">
+
+          ${branchHtml}
+
+        </div>
+
+
+      </div>
+
+
+      ${
+        data.coreIdea
+
+          ? `
+
+            <div class="coreIdea">
+
+              <div class="coreIdeaLabel">
+
+                今回の壁打ちで
+                見えてきたこと
+
+              </div>
+
+
+              <div class="coreIdeaText">
+
+                ${escapeHtml(
+                  data.coreIdea
+                )}
+
+              </div>
+
+            </div>
+          `
+
+          : ""
+      }
+    `;
 }
